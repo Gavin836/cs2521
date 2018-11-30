@@ -27,22 +27,47 @@ void list_print (link list)
 
 /** Create a new node, initialised with the item provided.
  * Return a pointer to node (link) */
-link node_new (Item it __unused)
+link node_new (Item it)
 {
-	return NULL;
+    link new = malloc(sizeof(node));
+    new->item = it;
+    new->next = NULL;
+	
+	return new;
 }
 
 /** Insert a new node into a given non-empty list.
  * The node is inserted directly after the head of the list. */
-void list_insert_next (link list __unused, link node __unused)
-{
-	return;
+void list_insert_next (link list, link node)
+{   
+
+    assert(list != NULL);
+    
+    link temp;
+    temp = list->next;
+    list->next = node;
+    node->next = temp;
+   
 }
 
 /** Return the sum of all items in list */
-int list_sum_items (link list __unused)
-{
-	return -1;
+int list_sum_items (link list)
+{   
+    if (list == NULL) {
+        return 0;
+    }
+    
+    int sum = list->item;
+    
+    //First node is null 
+	link curr = list;
+	
+	while (curr->next != NULL ) {
+	   curr = curr->next;
+	   sum += curr->item;	   
+	}
+	
+	return sum;
 }
 
 /** Frees all memory used in the list */
