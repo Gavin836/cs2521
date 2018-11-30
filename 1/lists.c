@@ -71,9 +71,19 @@ int list_sum_items (link list)
 }
 
 /** Frees all memory used in the list */
-void list_drop (link list __unused)
+void list_drop (link list)
 {
-	return;
+    link new_head = list->next;
+    
+    while (list != NULL) {
+        free (list);
+        
+        list = new_head;
+        
+        if (new_head != NULL) {
+            new_head = list->next;
+        }    
+    }    
 }
 
 
