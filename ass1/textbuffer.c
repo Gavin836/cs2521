@@ -18,13 +18,13 @@ typedef struct sentence {
 typedef struct textbuffer {
     Sentence head;
     Sentence tail;
-    int no_sentences; 
+    size_t no_sentences; 
 }textbuffer;
 
 //Prototypes
 void add_sentence(Textbuffer tb, char *string);
 
-static void whitebox_tests (void);
+void whitebox_tests (void);
 static void wtest_one (void);
 static void wtest_two (void);
 static void wtest_three (void);
@@ -34,7 +34,7 @@ Textbuffer textbuffer_new (const char *text){
     
     //Catch empty strings or no new lines.
     if (strcmp(text, "") == 0) {
-        puts("Empty string. Please input text");
+        //puts("Empty string. Please input text");
         return NULL;
     
     } else {
@@ -43,7 +43,7 @@ Textbuffer textbuffer_new (const char *text){
         while (1) {
             
             if (text[i] == '\0') {
-                puts("No newline character. Please try again");
+                //puts("No newline character. Please try again");
                 return NULL;
                 
             } else if (text[i] == '\n') {
@@ -119,9 +119,52 @@ void textbuffer_drop (Textbuffer tb){
     free(tb);    
 }
 
+size_t textbuffer_lines (Textbuffer tb){
 
+    if (tb == NULL) return 0;
+    
+    return tb->no_sentences;
+}
 
-static void whitebox_tests (void) {
+size_t textbuffer_bytes (Textbuffer tb){
+    if (tb == NULL) return 0;
+    
+    Sentence curr = tb->head->next;
+    
+    //Initialise to all new line characters
+    size_t count = textbuffer_lines(tb);
+    
+    while(curr != NULL) {
+        count = count + strlen(curr->prev->string);
+        curr = curr->next;
+    }
+    
+    count = count + strlen(tb->head->string);
+    
+    return count;
+}
+
+char *textbuffer_to_str (Textbuffer tb){
+
+    if(tb == NULL) return NULL;
+    
+    char *str = calloc(1, textbuffer_bytes(tb) + 1);
+    
+    Sentence curr = tb->head;
+    
+    while (curr->next != NULL) {
+        curr = curr->next;
+        strcat(str, curr->prev->string);
+        strcat(str, "\n");
+    }
+    
+    strcat(str, curr->string);
+    strcat(str, "\n");
+    
+    return str;
+}
+
+void whitebox_tests (void) {
     wtest_one();
     wtest_two();
     wtest_three();
@@ -132,13 +175,20 @@ static void wtest_one (void){
     
     Textbuffer new = textbuffer_new("Single\n");
     
-    assert(strcmp(new->head->string, "Single") == 0);
-    assert(new->no_sentences == 1);  
+    assert(textbuffer_lines(new) == 1);  
+    assert(textbuffer_bytes(new) == 7);    
     assert(new->head == new->tail);
+    assert(strcmp(new->head->string, "Single") == 0);
     
     assert(new->head->next == NULL);
     assert(new->head->prev == NULL);
-     
+    
+    char *string = textbuffer_to_str(new);
+    assert(strcmp(string, "Single\n") == 0);
+    free(string);
+    
+    textbuffer_drop(new);
+    
     puts(" -passed!");
 }
 
@@ -147,15 +197,22 @@ static void wtest_two (void){
     
     Textbuffer new = textbuffer_new("Single\nDouble\n");
     
-    assert(new->no_sentences == 2);  
+    assert(textbuffer_lines(new) == 2);  
+    assert(textbuffer_bytes(new) == 14);
     assert(new->head == new->tail->prev);
     assert(new->tail == new->head->next);
     
     assert(new->head->prev == NULL);
     assert(strcmp(new->head->string, "Single") == 0);
-    
+   
     assert(new->tail->next == NULL);
     assert(strcmp(new->tail->string, "Double") == 0);
+
+    char *string = textbuffer_to_str(new);
+    assert(strcmp(string, "Single\nDouble\n") == 0);
+    free(string);
+    
+    textbuffer_drop(new);
     
     puts(" -passed!");
 }
@@ -165,18 +222,25 @@ static void wtest_three (void){
     
     Textbuffer new = textbuffer_new("Single\nDouble\nTriple\n");
     
-    assert(new->no_sentences == 3);  
+    assert(textbuffer_lines(new) == 3);  
+    assert(textbuffer_bytes(new) == 21);
     assert(new->head == new->tail->prev->prev);
     assert(new->tail == new->head->next->next);
     
     assert(new->head->prev == NULL);
-    assert(new->head->next == new->tail->prev->prev);
+    assert(new->head->next == new->tail->prev);
     assert(strcmp(new->head->string, "Single") == 0);
     
     assert(strcmp(new->head->next->string, "Double") == 0);
     
     assert(new->tail->next == NULL);
     assert(strcmp(new->tail->string, "Triple") == 0);
+
+    char *string = textbuffer_to_str(new);
+    assert(strcmp(string, "Single\nDouble\nTriple\n") == 0);
+    free(string);
+
+    textbuffer_drop(new);
     
     puts(" -passed!");
 }
