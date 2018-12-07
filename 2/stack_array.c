@@ -24,6 +24,10 @@ struct stack {
 	Item *items;
 };
 
+void test_single(void);
+void test_realloc(void);
+void test_reducesize(void);	
+
 /** Create a new, empty Stack. */
 stack *stack_new (void)
 {
@@ -54,8 +58,13 @@ void stack_push (stack *s, Item it)
 	assert (s != NULL);
 	
 	if (s->n_items == s->capacity) {
-	    s->items = realloc(s->items, 2 * s->capacity * sizeof(Item));
-	    s->capacity = 2*s->capacity;	    
+	    s->capacity = 2 * s->capacity;	  
+	    Item *Ptr = s->items;
+	    s->items = realloc(s->items, s->capacity * sizeof(Item));
+	    
+	    //Ensure realloc succeeds
+	    assert(s->items != NULL);
+	    assert(s->items != Ptr);
 	}
 	
 	s->items[s->n_items] = it;
@@ -66,23 +75,37 @@ void stack_push (stack *s, Item it)
 Item stack_pop (stack *s)
 {
 	assert (s != NULL);
-	Item it;
-	
-	if ((s->capacity > DEFAULT_SIZE) && (s->programn_items < s->capacity / 4)) {	
-        s->n_items = s->capacity / 2;
-        s->items = realloc(s->items, s->capacity);
-    }
-    
-	if (s->n_items == 0) {
+
+    if (s->n_items == 0) {
 	    perror("stack underflow");
 	    abort();
 	    
-	} else {
-	    it = s->items[s->n_items - 1];
-	    s->n_items--;
 	}
 	
-	return it;DEFAULT_SIZE
+	Item it;
+	int i = 0;
+	
+	if ((s->capacity > DEFAULT_SIZE) && (s->n_items < s->capacity / 4)) {	
+        s->capacity = s->capacity / 2;
+        Item *new_item = calloc(1, sizeof(Item) * s->capacity);
+        
+        while (i < (int) s->capacity) {
+            new_item[i] = s->items[i];
+            i++;
+        }
+        
+        free(s->items);
+        
+        s->items = new_item;
+
+    }
+    
+    it = s->items[s->n_items - 1];
+    s->items[s->n_items - 1] = 0;
+    s->n_items--;
+
+	
+	return it;
 }
 
 /** Get the number of items in a Stack. */
@@ -104,43 +127,70 @@ void white_box_tests (void)
 
 void test_single(void) {
     puts("Single item test");
-    stack *new = stack_new;
+    stack *s = stack_new();
     Item it = 0;
     
-    stack_push(new, it);
+    stack_push(s, it);
     
     assert(s->capacity == 10);
     assert(s->n_items == 1);
-    assert(*(s->item) == 0)    
+    assert(*(s->items) == 0) ;   
+    
+    stack_drop(s);
 }
 
 void test_realloc(void) {
-    puts("Realloc at 10 items test");
-    stack *new = stack_new;
+    puts("Realloc after pushing with 40 items test");
+    stack *s = stack_new();
     Item item;
     
-    for (int i = 0; i < DEFAULT_SIZE; i++) {
+    for (int i = 0; i <= DEFAULT_SIZE * 4; i++) {
         item = i;
-        stack_push(new, item);
+        stack_push(s, item);
     }
+
+    assert(s->capacity == 80);
+    assert(s->n_items == (DEFAULT_SIZE * 4 + 1));
+    assert(s->items[40] == DEFAULT_SIZE * 4);   
     
-    assert(s->capacity == 20);
-    assert(s->n_items == DEFAULT_SIZE);
-    assert(*(s->item) == DEFAULT_SIZE);   
+    stack_drop(s);
 }
 
 void test_reducesize (void) {
-    stack *new = stack_new;
-    Item item;
+    printf("Reducing size of stack from 20 -> 10\n");
+    stack *s = stack_new();
+    Item item = 0;
+    int i;
     
-    for (int i = 0; i < DEFAULT_SIZE; i++) {
+    for (i = 0; i <= DEFAULT_SIZE; i++) {
         item = i;
-        stack_push(new, item);
+        stack_push(s, item);
     }
     
-    item = 0;
-    while (i > 5) {
-        stack_pop(new);
-        i--;
-    }
+    assert(s->capacity == 20);
+    assert(s->n_items == 11);
+    assert(s->items[10] == 10);
+    
+    //0-1-2-3-4-5-6-7-8-9-10
+    item = stack_pop(s);
+    assert(item == 10);
+    assert(s->items[10] == 0);
+    assert(s->items[9] == 9);
+    assert(s->n_items == 10);
+    
+    item = stack_pop(s);    //9
+    item = stack_pop(s);    //8    
+    item = stack_pop(s);    //7
+    item = stack_pop(s);    //6
+    item = stack_pop(s);    //5
+    item = stack_pop(s);    //4
+    item = stack_pop(s);    //3
+    
+    assert(item == 3);
+    assert(s->n_items == 3);
+    assert(s->capacity == 10);
+    assert(s->items[3] == 0);
+    assert(s->items[2] == 2);
+    
+    stack_drop(s);
 }
