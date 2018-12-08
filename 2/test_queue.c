@@ -14,7 +14,6 @@
 
 static void test_single (void);
 static void test_double (void);
-
 static void test_ten (void);
 
 int main (void)
@@ -34,6 +33,12 @@ static void test_single (void) {
     puts("Testing single node queue");
     Queue q = queue_new();
     Item it = 0;
+    
+    queue_en(q, it);
+    assert(queue_size(q) == (size_t) 1);
+    
+    assert(queue_de(q) == 0);
+    assert(queue_size(q) == 0);
     
     queue_en(q, it);
     assert(queue_size(q) == (size_t) 1);
