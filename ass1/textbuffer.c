@@ -23,11 +23,13 @@ typedef struct textbuffer {
 
 //Prototypes
 void add_sentence(Textbuffer tb, char *string);
+Sentence find_pos(Textbuffer tb, size_t pos);
 
 void whitebox_tests (void);
 static void wtest_one (void);
 static void wtest_two (void);
 static void wtest_three (void);
+static void wtest_two_lines (void);
 
 Textbuffer textbuffer_new (const char *text){
     int i;
@@ -164,10 +166,85 @@ char *textbuffer_to_str (Textbuffer tb){
     return str;
 }
 
-void whitebox_tests (void) {
+void textbuffer_swap (Textbuffer tb, size_t pos1, size_t pos2){
+    if (textbuffer_lines(tb) < pos1 || textbuffer_lines(tb) < pos2){
+        puts("Ensure positions are within the doucument");
+        abort();
+    }   
+    
+    size_t temp_size;
+    if (pos2 < pos1) {
+        temp_size = pos1;
+        pos1 = pos2;
+        pos2 = temp_size;
+    }
+
+    Sentence p1 = find_pos(tb, pos1);
+    Sentence p1_n = p1->next;
+    Sentence p1_p = NULL;
+    
+    Sentence p2 = find_pos(tb, pos2);
+    Sentence p2_p = p2->prev;
+    Sentence p2_n = NULL;
+    
+    Sentence temp_sent = p2;
+    
+    //Determine whether head and tail pointer need to be changed
+    if (p1 == tb->head) {
+        tb->head = p2;
+    
+    } else {
+        p1_p = p1->prev;   
+    }
+    
+    if (p2 == tb->tail) {
+        tb->tail = p1;  
+    
+    } else {
+        p2_n = p2->next;
+    } 
+
+    //Modify links
+    assert(p1_n != NULL);
+    p1_n->prev = p2;
+    
+    if (p1->prev != NULL)
+        p1_p->next = p2;
+    
+    assert(p2_p != NULL);
+    p2_p->next = p1;
+    
+    if (p2_n != NULL)
+        p2_n->prev = p1;
+    
+    p2->next = p1_n;
+    p2->prev = p1_p;
+    
+    p1->next = temp_sent->next;
+    p2->prev = temp_sent->prev;
+         
+}
+
+Sentence find_pos(Textbuffer tb, size_t pos) {
+    assert(pos < tb->no_sentences);
+    
+    int i = 0;
+    Sentence curr = tb->head;
+    
+    while (i < (int) pos) {
+        curr = curr->next;
+        i++;
+    }
+    
+    return curr;
+}
+
+
+void white_box_tests (void) {
     wtest_one();
     wtest_two();
     wtest_three();
+    wtest_two_lines();
 }
 
 static void wtest_one (void){
@@ -242,5 +319,31 @@ static void wtest_three (void){
 
     textbuffer_drop(new);
     
+    puts(" -passed!");
+}
+
+static void wtest_two_lines (void){
+    printf("Two sentence swap test");
+    Textbuffer tb;
+    
+    tb = textbuffer_new("Line 0\nLine 1\n");
+    
+    textbuffer_swap(tb, 0, 1);
+    assert(strcmp(tb->head->string, "Line 1") == 0);
+    assert(strcmp(tb->tail->string, "Line 0") == 0);
+    assert(tb->head->prev == NULL);
+    assert(tb->head->next == tb->tail);
+    assert(tb->tail->next == NULL);
+    assert(tb->tail->prev == tb->head);
+    
+    textbuffer_swap(tb, 1, 0);
+    assert(strcmp(tb->head->string, "Line 0") == 0);
+    assert(strcmp(tb->tail->string, "Line 1") == 0);
+    assert(tb->head->prev == NULL);
+    assert(tb->head->next == tb->tail);
+    assert(tb->tail->next == NULL);
+    assert(tb->tail->prev == tb->head);
+    
+    textbuffer_drop(tb);
     puts(" -passed!");
 }
