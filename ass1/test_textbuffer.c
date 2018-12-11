@@ -13,7 +13,7 @@
 static void test_textbuffer_empty (void);
 static void test_textbuffer_one (void);
 static void test_textbuffer_two (void);
-static void test_2texbuffers(void);
+static void test_2texbuffers(void)a
 static void test_textbuffer_text (void);
 
 int main (void)

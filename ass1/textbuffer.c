@@ -23,6 +23,7 @@ typedef struct textbuffer {
 
 //Prototypes
 void add_sentence(Textbuffer tb, char *string);
+void remove_from_tb (Textbuffer tb, Sentence curr);
 Sentence find_pos(Textbuffer tb, size_t pos);
 
 void whitebox_tests (void);
@@ -79,7 +80,7 @@ Textbuffer textbuffer_new (const char *text){
     return tb_new;
 }
 
-void add_sentence(Textbuffer tb, char *string) {
+void add_sentence (Textbuffer tb, char *string) {
     
     // Produce "sentence" struct
     char *temp = strdup(string);
@@ -179,62 +180,52 @@ void textbuffer_swap (Textbuffer tb, size_t pos1, size_t pos2){
         pos1 = pos2;
         pos2 = temp_size;
     }
-    //oOo --- oOo --- oOo
+    
+    // Remove sentence from list and 
     Sentence p1 = find_pos(tb, pos1);
     Sentence p2 = find_pos(tb, pos2);
     
-    if (p1->next == p2) {
+    remove_from_tb(tb, p1);
+    remove_from_tb(tb, p2);
     
+    sentence temp = *p1;
     
-    
+    //Update head and tail if needed
+    if (p1 == tb->head) 
+        tb->head = p2;
+        
+    if (p2 == tb->tail)
+        tb->tail = p1;
+        
+    size_t i = 0;
+    Textbuffer 
+    while (i < tb->no_sentences) {
+        
+        if (i == pos1) add_sentence(p2);
+        if (i == pos2) add_sentence(p1);
+        
+        i++;
     }
-    
     
     #if 0
-    Sentence p1 = find_pos(tb, pos1);
-    Sentence p1_n = p1->next;
-    Sentence p1_p = NULL;
+    p1->next = p2->next;
+    p1->prev = p2->prev;
     
-    Sentence p2 = find_pos(tb, pos2);
-    Sentence p2_p = p2->prev;
-    Sentence p2_n = NULL;
-    
-    Sentence temp_sent = p2;
-    
-    //Determine whether head and tail pointer need to be changed
-    if (p1 == tb->head) {
-        tb->head = p2;
-    
-    } else {
-        p1_p = p1->prev;   
-    }
-    
-    if (p2 == tb->tail) {
-        tb->tail = p1;  
-    
-    } else {
-        p2_n = p2->next;
-    } 
-
-    //Modify links
-    assert(p1_n != NULL);
-    p1_n->prev = p2;
+    if (p1->next != NULL) 
+        p1->next->prev = p1;
     
     if (p1->prev != NULL)
-        p1_p->next = p2;
+        p1->prev->next = p1;
     
-    assert(p2_p != NULL);
-    p2_p->next = p1;
+    p2->next = temp.next;
+    p2->prev = temp.prev;
     
-    if (p2_n != NULL)
-        p2_n->prev = p1;
-    
-    p2->next = p1_n;
-    p2->prev = p1_p;
-    
-    p1->next = temp_sent->next;
-    p2->prev = temp_sent->prev;
-    #endif     
+    if (p2->next != NULL) 
+        p2->next->prev = p2;
+        
+    if (p2->prev != NULL)
+        p2->prev->next = p2;
+    #endif
 }
 
 Sentence find_pos(Textbuffer tb, size_t pos) {
@@ -249,6 +240,19 @@ Sentence find_pos(Textbuffer tb, size_t pos) {
     }
     
     return curr;
+}
+
+void remove_from_tb (Textbuffer tb, Sentence tb) {
+    assert(tb->no_sentences > 0);
+    
+    if (curr->next != NULL) {
+        curr->next->prev = curr->prev;
+    }
+    
+    if (curr->prev != NULL)
+        curr->prev->next = curr->next;
+    
+    tb->no_sentences--;
 }
 
 
