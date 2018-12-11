@@ -121,6 +121,7 @@ void textbuffer_drop (Textbuffer tb){
     free(tb);    
 }
 
+
 size_t textbuffer_lines (Textbuffer tb){
 
     if (tb == NULL) return 0;
@@ -178,7 +179,18 @@ void textbuffer_swap (Textbuffer tb, size_t pos1, size_t pos2){
         pos1 = pos2;
         pos2 = temp_size;
     }
-
+    //oOo --- oOo --- oOo
+    Sentence p1 = find_pos(tb, pos1);
+    Sentence p2 = find_pos(tb, pos2);
+    
+    if (p1->next == p2) {
+    
+    
+    
+    }
+    
+    
+    #if 0
     Sentence p1 = find_pos(tb, pos1);
     Sentence p1_n = p1->next;
     Sentence p1_p = NULL;
@@ -222,7 +234,7 @@ void textbuffer_swap (Textbuffer tb, size_t pos1, size_t pos2){
     
     p1->next = temp_sent->next;
     p2->prev = temp_sent->prev;
-         
+    #endif     
 }
 
 Sentence find_pos(Textbuffer tb, size_t pos) {
