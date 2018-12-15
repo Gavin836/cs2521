@@ -19,3 +19,6 @@ clean:
 give:
 	give cs2521 assign1 textbuffer.c test_textbuffer.c
 
+dryruns = $(addprefix dryrun, $(shell seq -w 0 10))
+all: ${dryruns}
+$(foreach d, ${dryruns}, $(eval ${d}: ${d}.o textbuffer.o))
