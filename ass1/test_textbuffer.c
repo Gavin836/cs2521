@@ -66,7 +66,7 @@ static void test_textbuffer_one (void){
     
     assert(new != NULL);
     assert(textbuffer_lines(new) == 1);
-    assert(textbuffer_bytes(new) == 2);
+    assert(textbuffer_bytes(new) == 1);
     
     char *str = textbuffer_to_str(new);
     assert(strcmp(str,"\n") == 0);
@@ -88,7 +88,7 @@ static void test_textbuffer_two (void){
    
     assert(new != NULL);
     assert(textbuffer_lines(new));
-    assert(textbuffer_bytes(new) == 3);
+    assert(textbuffer_bytes(new) == 2);
     assert(textbuffer_search(new, "", false) == 0);
     assert(textbuffer_search(new, "", true) == 1);
     
@@ -112,7 +112,7 @@ static void test_textbuffer_sent2 (void){
     
     textbuffer_swap(new, 0, 1);
     assert(textbuffer_lines(new) == 2);
-    assert(textbuffer_bytes(new) == 32);
+    assert(textbuffer_bytes(new) == 31);
     
     char *str = textbuffer_to_str(new);
     assert(strcmp(str, "Second sentence\nFirst sentence\n") == 0);
@@ -143,7 +143,7 @@ static void test_textbuffer_sent3 (void){
     
     textbuffer_swap(new, 0, 2);
     assert(textbuffer_lines(new) == 3);
-    assert(textbuffer_bytes(new) == 47);
+    assert(textbuffer_bytes(new) == 46);
     
     char *str = textbuffer_to_str(new);
     assert(strcmp(str, "Third sentence\nSecond sentence\nFirst sentence\n") == 0);
@@ -177,10 +177,10 @@ static void test_multi_buf(void){
     
     new = textbuffer_new("1.First\n1.Second\n");
     assert(textbuffer_lines(new) == 2);
-    assert(textbuffer_bytes(new) == 18);
+    assert(textbuffer_bytes(new) == 17);
         
     new2 = textbuffer_new("2.First\n2.Second\n");
-    assert(textbuffer_bytes(new) == 18);
+    assert(textbuffer_bytes(new) == 17);
     
     textbuffer_insert (new, 1, new2);
     char *str = textbuffer_to_str(new);

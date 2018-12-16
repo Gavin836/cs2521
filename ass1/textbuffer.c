@@ -127,7 +127,7 @@ size_t textbuffer_bytes (Textbuffer tb){
         curr_buf = tb->head->next;
     
     //Initialise to all new line characters and NUL terminator
-    size_t count = textbuffer_lines(tb) + 1;
+    size_t count = textbuffer_lines(tb);
     
     while(curr_buf != NULL) {
         count = count + strlen(curr->string);
@@ -395,7 +395,8 @@ Textbuffer textbuffer_copy (Textbuffer tb, size_t from, size_t to){
     return new2;
 }
 
-void textbuffer_delete (Textbuffer tb, size_t from, size_t to){
+void textbuffer_delete (Textbuffer tb, size_t from, size_t to){   
+    
     Sentence curr = find_pos(tb, from);
     Sentence curr_to = find_pos(tb, to);
     
@@ -403,7 +404,7 @@ void textbuffer_delete (Textbuffer tb, size_t from, size_t to){
         remove_from_tb(tb, curr);
         free(curr);
     
-    } else {
+    } else if (from < to) {
         // Increment preemptively to enable freeing memory
         curr = curr->next;
        
@@ -420,6 +421,7 @@ void textbuffer_delete (Textbuffer tb, size_t from, size_t to){
         // Final element i.e curr_to
         remove_from_tb(tb, curr);
         free(curr);       
+    
     }
 
 }
@@ -530,7 +532,7 @@ static void wtest_one (void){
     Textbuffer new = textbuffer_new("Single\n");
     
     assert(textbuffer_lines(new) == 1);  
-    assert(textbuffer_bytes(new) == 8);    
+    assert(textbuffer_bytes(new) == 7);    
     assert(new->head == new->tail);
     assert(strcmp(new->head->string, "Single") == 0);
     
@@ -552,7 +554,7 @@ static void wtest_two (void){
     Textbuffer new = textbuffer_new("Single\nDouble\n");
     
     assert(textbuffer_lines(new) == 2);  
-    assert(textbuffer_bytes(new) == 15);
+    assert(textbuffer_bytes(new) == 14);
     assert(new->head == new->tail->prev);
     assert(new->tail == new->head->next);
     
@@ -577,7 +579,7 @@ static void wtest_three (void){
     Textbuffer new = textbuffer_new("Single\nDouble\nTriple\n");
     
     assert(textbuffer_lines(new) == 3);  
-    assert(textbuffer_bytes(new) == 22);
+    assert(textbuffer_bytes(new) == 21);
     assert(new->head == new->tail->prev->prev);
     assert(new->tail == new->head->next->next);
     

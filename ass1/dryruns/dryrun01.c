@@ -16,7 +16,8 @@ int main (void)
 
 	Textbuffer tb = textbuffer_new (DRY01_STR);
 	assert (tb != NULL);
-
+    
+    printf("%d\n", strlen(DRY01_STR));
 	assert (textbuffer_bytes (tb) == strlen (DRY01_STR));
 	assert (textbuffer_lines (tb) == 2);
 
