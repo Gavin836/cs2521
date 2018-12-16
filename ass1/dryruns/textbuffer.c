@@ -178,7 +178,7 @@ void textbuffer_swap (Textbuffer tb, size_t pos1, size_t pos2){
         pos2 = temp_size;
     }
     
-    // Find the address of the specific sentences, then remove from buffer
+    // Find the address of the sentences, then remove them from buffer
     Sentence p1 = find_pos(tb, pos1);
     Sentence p2 = find_pos(tb, pos2);
     
@@ -334,7 +334,6 @@ void textbuffer_paste (Textbuffer tb1, size_t pos, Textbuffer tb2){
 }
 
 Textbuffer textbuffer_cut (Textbuffer tb, size_t from, size_t to){
-
     
     if ((to > tb->no_sentences) || (from > to)) {
         puts("Positions are out of range");
@@ -457,8 +456,7 @@ ssize_t textbuffer_search (Textbuffer tb, char *match, bool rev){
                 
             curr = curr->prev;
             sent--;
-        }
-        
+        }        
     }
     
     return -1;
@@ -473,8 +471,18 @@ void textbuffer_replace (Textbuffer tb, char *match, char *replace){
     char *match_ptr = NULL;
     char *curr_str = NULL;
     char *curr_str_copy = NULL;
+   
+    int *index_check = calloc(1, 4 * tb->no_sentences);
+    
     // Find the index of the matching sentences
+    if (strcmp(match, "") != 0)
     while ((index = textbuffer_search(tb, match, false)) != -1) {   
+        
+        // Ensure that sentences that have already been FULLY replaced are 
+        // not replaced again
+        
+        if (index_check[index] == 1) break;
+        
         curr = find_pos(tb, (size_t) index);
         curr_str = strdup(curr->string);
         curr_str_copy = curr_str;
@@ -483,7 +491,8 @@ void textbuffer_replace (Textbuffer tb, char *match, char *replace){
         new_str = calloc(1, strlen(curr_str) + strlen(replace) + 1);
         insert_pos = new_str;
         
-        // Increment through all matches in the string. Code referenced from "The Paramagnetic Croissant". 
+        // Increment through all matches in the string. Code referenced from 
+        // "The Paramagnetic Croissant". 
         // (https://stackoverflow.com/questions/32413667/replace-all-occurrences-of-a-substring-in-a-string-in-c)
         
         while (1) {
@@ -510,8 +519,12 @@ void textbuffer_replace (Textbuffer tb, char *match, char *replace){
         new_str = realloc(new_str, strlen(new_str) + 1);
         free(curr_str_copy);
         free(curr->string);
-        curr->string = new_str;        
+       
+        curr->string = new_str;   
+        index_check[index] = 1;     
     }
+    
+    free(index_check);
 }
 
 void white_box_tests (void) {
@@ -533,15 +546,20 @@ static void wtest_one (void){
     
     assert(textbuffer_lines(new) == 1);  
     assert(textbuffer_bytes(new) == 7);    
+    assert(textbuffer_search(new, "Single", false) == 0);
     assert(new->head == new->tail);
     assert(strcmp(new->head->string, "Single") == 0);
     
     assert(new->head->next == NULL);
     assert(new->head->prev == NULL);
     
-    char *string = textbuffer_to_str(new);
-    assert(strcmp(string, "Single\n") == 0);
-    free(string);
+    assert(strcmp(new->head->string, "Single") == 0);
+    
+    textbuffer_replace(new, "Sin", "Prin");
+    assert(strcmp(new->head->string, "Pringle") == 0);
+    
+    textbuffer_replace(new, "old", "new");
+    assert(strcmp(new->head->string, "Pringle") == 0);
     
     textbuffer_drop(new);
     
@@ -555,6 +573,8 @@ static void wtest_two (void){
     
     assert(textbuffer_lines(new) == 2);  
     assert(textbuffer_bytes(new) == 14);
+    assert(textbuffer_search(new, "Double", true) == 1);
+    assert(textbuffer_search(new, "Double", false) == 1);
     assert(new->head == new->tail->prev);
     assert(new->tail == new->head->next);
     
@@ -563,10 +583,14 @@ static void wtest_two (void){
    
     assert(new->tail->next == NULL);
     assert(strcmp(new->tail->string, "Double") == 0);
-
-    char *string = textbuffer_to_str(new);
-    assert(strcmp(string, "Single\nDouble\n") == 0);
-    free(string);
+    
+    assert(strcmp(new->head->string, "Single") == 0);
+    assert(strcmp(new->tail->string, "Double") == 0);
+    
+    textbuffer_replace(new, "Dou", "");
+    assert(strcmp(new->tail->string, "ble") == 0);
+    assert(textbuffer_bytes(new) == 11);
+    assert(new->no_sentences == 2);
     
     textbuffer_drop(new);
     
@@ -592,10 +616,16 @@ static void wtest_three (void){
     assert(new->tail->next == NULL);
     assert(strcmp(new->tail->string, "Triple") == 0);
 
-    char *string = textbuffer_to_str(new);
-    assert(strcmp(string, "Single\nDouble\nTriple\n") == 0);
-    free(string);
-
+    assert(strcmp(new->head->string, "Single") == 0);
+    assert(strcmp(new->head->next->string, "Double") == 0);
+    assert(strcmp(new->tail->string, "Triple") == 0);
+    
+    textbuffer_delete(new, 1, 1);
+    assert(strcmp(new->head->string, "Single") == 0);
+    assert(strcmp(new->tail->string, "Triple") == 0);
+    assert(new->no_sentences == 2);
+    assert(textbuffer_bytes(new) == 14);
+    
     textbuffer_drop(new);
     
     puts(" -passed!");

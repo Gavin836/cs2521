@@ -222,12 +222,55 @@ static void test_cut (void){
 
 static void test_replace (void){
     printf("Replacing test");
+    
+    char *str; 
+    
     Textbuffer new = textbuffer_new("rep\nFrep\nFrepE\nFrep\nEND\n");
-    textbuffer_replace(new, "rep", "REP");
-    char *str = textbuffer_to_str(new);
-    assert(strcmp(str, "REP\nFREP\nFREPE\nFREP\nEND\n") == 0);
-        
+    
+    textbuffer_replace(new, "", "EMPTY");
+    str = textbuffer_to_str(new);
+    assert(strcmp(str, "rep\nFrep\nFrepE\nFrep\nEND\n") == 0);
+    free(str);
+    
+    textbuffer_replace(new, "rep", "_");
+    str = textbuffer_to_str(new);
+    assert(strcmp(str, "_\nF_\nF_E\nF_\nEND\n") == 0);   
+    free(str);   
+     
     textbuffer_drop(new);
-
+    
+    
+    new = textbuffer_new("ABC");
+    textbuffer_replace(new, "ABC", "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    str = textbuffer_to_str(new);
+    assert(strcmp(str, "ABCDEFGHIJKLMNOPQRSTUVWXYZ\n") == 0);    
+    free(str);
+    
+    textbuffer_drop(new);
+    
+    new = textbuffer_new("ABC");
+    textbuffer_replace(new, "ABC", "");
+    str = textbuffer_to_str(new);
+    assert(strcmp(str, "\n") == 0);
+    assert(textbuffer_lines(new) == 1);    
+    free(str);
+    
+    textbuffer_drop(new);
+           
+    new = textbuffer_new("ABC");
+    textbuffer_replace(new, "DEF", "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    str = textbuffer_to_str(new);
+    assert(strcmp(str, "ABC\n") == 0);   
+    free(str);
+    
+    textbuffer_replace(new, "", "EMPTY");
+    str = textbuffer_to_str(new);
+    assert(strcmp(str, "ABC\n") == 0);
+    free(str);
+    
+    textbuffer_drop(new);
+    
+    
+    
     puts(" -passed!");
 }
