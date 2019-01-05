@@ -14,6 +14,7 @@
 
 void test_leaf1(void);
 void test_leaf3(void);
+void test_neg_bst(void);
 
 int main (void)
 {
@@ -21,7 +22,9 @@ int main (void)
 
 	// add more tests of your own!
     test_leaf1();
-    //test_leaf3();
+    test_leaf3();
+    
+    test_neg_bst();
     
 	puts ("\nAll tests passed. You are awesome!");
 	return EXIT_SUCCESS;
@@ -29,21 +32,63 @@ int main (void)
 
 void test_leaf1(void){
     Item it = int_item_new(5);
-    btree_node tree = btree_node_new(it);
+    BTreeNode Tree = NULL;
+    Tree = btree_insert(Tree, it);
     
-    assert(btree_size(tree) == 1);
+    assert(Tree != NULL);
+    assert(btree_search(Tree, it) != NULL);
+    
+    assert(btree_size(Tree) == 1);
+    assert(btree_size_leaf(Tree) == 1);
+    
+    assert(btree_count_if(Tree, even_p) == 0);
+    assert(btree_count_if(Tree, odd_p) == 1);
+    assert(btree_count_if(Tree, negative_p) == 0);
+    
+    btree_drop(Tree);
 }
 
 void test_leaf3(void){
     Item it = int_item_new(5);
-    btree_node tree = btree_node_new(it);
+    BTreeNode Tree = NULL;
+    Tree = btree_insert(Tree, it);
+
     
     it = int_item_new(10);
-    btree_insert(tree, it);
+    Tree = btree_insert(Tree, it);
     
     it = int_item_new(1);
-    btree_insert(tree, it);
+    Tree = btree_insert(Tree, it);  
     
-    assert(btree_size(tree) == 3);
+    assert(btree_size(Tree) == 3);
+    assert(btree_size_leaf(Tree) == 2);
+    
+    assert(btree_count_if(Tree, even_p) == 1);
+    assert(btree_count_if(Tree, odd_p) == 2);
+    assert(btree_count_if(Tree, negative_p) == 0);
+    
+    btree_drop(Tree);
 }
 
+void test_neg_bst(void){
+    Item it = int_item_new(-5);
+    BTreeNode Tree = NULL;
+    Tree = btree_insert(Tree, it);
+
+    
+    it = int_item_new(-10);
+    Tree = btree_insert(Tree, it);
+    
+    it = int_item_new(1);
+    Tree = btree_insert(Tree, it);  
+    
+    assert(btree_size(Tree) == 3);
+    assert(btree_size_leaf(Tree) == 2);
+    
+    assert(btree_count_if(Tree, even_p) == 1);
+    assert(btree_count_if(Tree, odd_p) == 2);
+    assert(btree_count_if(Tree, negative_p) == 2);
+    
+    btree_drop(Tree);
+
+}

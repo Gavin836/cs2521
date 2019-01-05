@@ -14,6 +14,8 @@
 #include "item.h"
 #include "item_int.h"
 #include "testable.h"
+#include "queue.h"
+#include "item_btree_node.h"
 
 typedef struct btree_node btree_node;
 struct btree_node {
@@ -36,6 +38,14 @@ static void btree_traverse_infix (btree_node *, traverse_state *);
 static void btree_traverse_postfix (btree_node *, traverse_state *);
 static void btree_traverse_level (btree_node *, traverse_state *);
 static void btree_traverse_visit (btree_node *, traverse_state *);
+
+bool even_p (Item it);
+bool odd_p (Item it);
+bool negative_p (Item it);
+
+static void test_leaf1(void);
+static void test_leaf3(void);
+static void test_bst_neg(void);
 
 // Remove `__unused' tags from your functions before flight.
 #ifndef __unused
@@ -161,11 +171,17 @@ size_t btree_size (btree_node *tree)
 }
 
 /** Returns the number of leaf nodes in the tree. */
-size_t btree_size_leaf (BTreeNode tree __unused)
+size_t btree_size_leaf (BTreeNode tree)
 {
-	warnx ("btree_size_leaf unimplemented");
-	// implement me!
-	return 0;
+    size_t leaf = 0;
+    if (tree == NULL) return 0;
+	
+	if (tree->left == NULL && tree->right == NULL) leaf++;
+	
+	return leaf
+		+  btree_size_leaf (tree->left)
+		+  btree_size_leaf (tree->right);
+
 }
 
 /** Returns the height of a tree. */
@@ -179,10 +195,15 @@ size_t btree_height (btree_node *tree)
 }
 
 /** Destroy a tree, releasing all resources it requires. */
-void btree_drop (btree_node *tree __unused)
+void btree_drop (btree_node *tree)
 {
-	warnx ("btree_drop unimplemented");
-	// implement me!
+    
+    if (tree->left != NULL) btree_drop(tree->left);
+    
+    if (tree->right != NULL) btree_drop(tree->right);
+   
+    free(tree->item);
+    free(tree);
 }
 
 /**
@@ -193,11 +214,42 @@ void btree_drop (btree_node *tree __unused)
  */
 size_t btree_count_if (btree_node *tree, btree_pred_fp pred)
 {
-	warnx ("btree_count_if unimplemented");
-	// implement me!
-	return 0;
+	size_t count = 0;
+	btree_node **list;
+	list = btree_traverse (tree, BTREE_TRAVERSE_LEVEL, NULL);
+	
+	for (size_t i = 0; i < btree_size(tree); i++) {
+	    if (pred(list[i]->item) == true) count++;
+	}
+	
+	free(list);
+	
+	return count;
 }
 
+bool even_p (Item it){
+    int val = int_item(it);
+    
+    if (val%2 == 0) return true;
+    
+    return false;
+}
+
+bool odd_p (Item it){
+    int val = int_item(it);
+    
+    if (val%2 != 0 ) return true;
+    
+    return false;
+}
+
+bool negative_p (Item it){
+    int val = int_item(it);
+    
+    if (val < 0) return true;
+    
+    return false;
+}
 ////////////////////////////////////////////////////////////////////////
 
 static btree_node *btree_node_new (Item it)
@@ -264,11 +316,27 @@ static void btree_traverse_postfix (
  * @param state	the current state of the traversal
  */
 static void btree_traverse_level (
-	btree_node *tree __unused,
-	traverse_state *state __unused)
+	btree_node *tree,
+	traverse_state *state)
 {
-	warnx ("btree_traverse_level unimplemented");
-	// implement me!
+    BTreeNode curr;
+    Item it;
+	Queue q = queue_new();
+	
+	queue_en(q, btree_node_value(tree));
+	
+	while (queue_size(q) > 0) {
+	    it = queue_de(q);
+	    curr = btree_search(tree, it);
+	    
+	    btree_traverse_visit(curr, state);
+	    
+	    if (curr->left != NULL) queue_en(q, btree_node_value(curr->left));
+	    if (curr->right != NULL) queue_en(q, btree_node_value(curr->right));
+	    
+	}
+
+	queue_drop(q);
 }
 
 /**
@@ -298,6 +366,79 @@ static void btree_traverse_visit (
 
 void white_box_tests (void)
 {
-	warnx ("white_box_tests unimplemented");
-	// implement me!
+    test_leaf1();
+    test_leaf3();
+    
+    test_bst_neg();
+    
+}
+
+static void test_leaf1(void){
+    Item it = int_item_new(5);
+    BTreeNode Tree = NULL;
+    Tree = btree_insert(Tree, it);
+    
+    assert(Tree != NULL);
+    assert(Tree->item != NULL);
+    assert(Tree->left == NULL);
+    assert(Tree->right == NULL);
+    
+    btree_node **list;
+    list = btree_traverse (Tree, BTREE_TRAVERSE_LEVEL, NULL);
+    
+    assert(list[0] == Tree);
+    
+    free(list);
+    btree_drop(Tree);
+}
+static void test_leaf3(void){
+    Item it = int_item_new(5);
+    Item it_1 = int_item_new(10);
+    Item it_2 = int_item_new(1);
+
+    BTreeNode Tree = NULL;
+  
+    Tree = btree_insert(Tree, it);    
+    Tree = btree_insert(Tree, it_1);
+    Tree = btree_insert(Tree, it_2);  
+    
+    assert(Tree->item == it);
+    assert(Tree->left->item == it_2);
+    assert(Tree->right->item == it_1);
+   
+    btree_node **list;
+    list = btree_traverse (Tree, BTREE_TRAVERSE_LEVEL, NULL);
+    
+    assert(list[0] == Tree);
+    assert(list[1] == Tree->left);
+    assert(list[2] == Tree->right);
+    
+    free(list);
+    btree_drop(Tree);
+}
+
+static void test_bst_neg(void){
+    Item it = int_item_new(-5);
+    Item it_1 = int_item_new(-10);
+    Item it_2 = int_item_new(1);
+
+    BTreeNode Tree = NULL;
+  
+    Tree = btree_insert(Tree, it);    
+    Tree = btree_insert(Tree, it_1);
+    Tree = btree_insert(Tree, it_2);  
+    
+    assert(Tree->item == it);
+    assert(Tree->left->item == it_1);
+    assert(Tree->right->item == it_2);
+   
+    btree_node **list;
+    list = btree_traverse (Tree, BTREE_TRAVERSE_LEVEL, NULL);
+    
+    assert(list[0] == Tree);
+    assert(list[1] == Tree->left);
+    assert(list[2] == Tree->right);
+    
+    free(list);
+    btree_drop(Tree);
 }

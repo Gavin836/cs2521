@@ -15,12 +15,14 @@
 static void test_single (void);
 static void test_double (void);
 static void test_ten (void);
+static void pop_empty (void);
 
 int main (void)
 {
 	white_box_tests ();
     
 	// add more tests of your own!
+    pop_empty();
     test_single();
     test_double();
     test_ten();
@@ -29,6 +31,11 @@ int main (void)
 	return EXIT_SUCCESS;
 }
 
+static void pop_empty (void) {
+    Queue q = queue_new();
+    queue_de(q);
+
+}
 static void test_single (void) {
     puts("Testing single node queue");
     Queue q = queue_new();
