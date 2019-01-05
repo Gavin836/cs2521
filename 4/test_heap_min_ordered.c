@@ -42,8 +42,25 @@ static void test_ordered_minheaps (void)
 	assert (heap_min_ordered_p (tree));
 
 	// ... add more tests! ...
+ 
+    node *leaf_1 = malloc (sizeof *leaf);
+    assert(leaf_1 != NULL);
+	(*leaf_1) = (node) { .item = 10, .left = NULL, .right = NULL };
+	tree->right = leaf_1;
 
+	puts ("ordered: test 4: tree size 3");
+	assert (heap_min_ordered_p (tree));
+    
+    node *leaf_2 = malloc (sizeof *leaf);
+	(*leaf_2) = (node) { .item = 20, .left = NULL, .right = NULL };
+	tree->left->left = leaf_2;
+
+	puts ("ordered: test 5: tree size 4");
+	assert (heap_min_ordered_p (tree));
+	
 	free (leaf);
+	free (leaf_1);
+	free (leaf_2);
 	free (tree);
 }
 
@@ -60,7 +77,30 @@ static void test_unordered_minheaps (void)
 	assert (! heap_min_ordered_p (tree));
 
 	// ... add more tests! ...
+    node *leaf_1 = malloc (sizeof *leaf);
+	(*leaf_1) = (node) { .item = 10, .left = NULL, .right = NULL };
+	tree->right = leaf_1;
 
+	puts ("unordered: test 2: tree size 3");
+	assert (! heap_min_ordered_p (tree));
+	
+	node *leaf_2 = malloc (sizeof *leaf);
+	(*leaf_2) = (node) { .item = 50, .left = NULL, .right = NULL };
+	tree->left->left = leaf_2;
+
+	puts ("unordered: test 3: tree size 4");
+	assert (! heap_min_ordered_p (tree));
+	
+	node *leaf_3 = malloc (sizeof *leaf);
+	(*leaf_3) = (node) { .item = 55, .left = NULL, .right = NULL };
+	tree->left->right = leaf_3;
+
+	puts ("unordered: test 4: tree size 5");
+	assert (! heap_min_ordered_p (tree));
+	
 	free (leaf);
+	free (leaf_1);
+	free (leaf_2);
+	free (leaf_3);
 	free (tree);
 }

@@ -10,5 +10,17 @@
  */
 bool heap_min_ordered_p (node *tree)
 {
+    //Return true for empty nodes/tree
+	if (tree == NULL) return true;
+	
+	if (heap_min_ordered_p(tree->left) == true && heap_min_ordered_p(tree->right) == true) {
+	    
+	    if ((tree->left == NULL || tree->left->item >= tree->item) && 
+	        (tree->right == NULL || tree->right->item >= tree->item)) {
+	        
+	        return true;
+        }
+	}   
+		
 	return false;
 }

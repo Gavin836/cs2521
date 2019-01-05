@@ -28,8 +28,19 @@ static void test_valid_minheaps (void)
 
 	puts ("valid minheaps: test 1: 2,10");
 	assert (heap_min_p (heap1, 2));
-
+    
 	// ... add more tests! ...
+    int heap2[] = {0, 1, 2, 3, 4, 5, 6};
+    puts("valid minheaps: test 2: 1,2,3,4,5,6");
+	assert (heap_min_p (heap2, 6));
+	
+	int heap3[] = {0, 5, 6, 8, 7, 8, 9, 20};
+    puts("valid minheaps: test 4: 5,6,8,7,8,9,20");
+	assert (heap_min_p (heap3, 7));
+    
+    int heap4[] = {0, 1};
+    puts("valid minheaps: test 3: 1");
+	assert (heap_min_p (heap4, 1));
 }
 
 static void test_invalid_minheaps (void)
@@ -40,4 +51,16 @@ static void test_invalid_minheaps (void)
 	assert (! heap_min_p (heap1, 3));
 
 	// ... add more tests! ...
+	int heap2[] = { 0, 5, 4, 3 };
+
+	puts ("invalid minheaps: test 2: 5,4,3");
+	assert (! heap_min_p (heap2, 3));
+	
+	int heap3[] = {0, 5, 6, 8, 7, 8, 9, 7};
+	puts("invalid minheaps: test 4: 5,6,8,7,8,9,7");
+	assert (!heap_min_p (heap3, 7));
+	
+	int heap4[] = {0, 5, 4, 6, 7, 8, 9, 7};
+	puts("invalid minheaps: test 5: 5,4,6,7,8,9,7");
+	assert (!heap_min_p (heap4, 7));
 }
