@@ -14,6 +14,9 @@
 #include "map.h"
 #include "places.h"
 
+#define MAX_SEAS 2
+#define NO_TRANS 3
+
 typedef struct vNode *VList;
 struct vNode {
 	LocationID  v;    // ALICANTE, etc
@@ -28,6 +31,8 @@ struct map {
 };
 
 static void addConnections(Map);
+VList find_vlist(Map g, LocationID find, int max);
+int find_connect(VList main, LocationID find);
 
 // Create a new empty graph (for a map)
 // #Vertices always same as NUM_PLACES
@@ -151,13 +156,63 @@ static void addConnections (Map g)
 		addLink (g, CONNECTIONS[i].v, CONNECTIONS[i].w, CONNECTIONS[i].t);
 }
 
-
-// Returns the number of direct connections between two nodes
-// Also fills the type[] array with the various connection types
-// Returns 0 if no direct connection (i.e. not adjacent in graph)
 int connections (Map g, LocationID start, LocationID end, TransportID type[])
 {
 	assert (g != NULL);
-    // TODO: complete this fucntion
-	return 0;  // to keep the compiler happy
+	
+	int no_conn = 0;
+    LocationID seas[MAX_SEAS] = {0};
+	int sea_index = 0;
+	
+	//Find the approprite list of connections
+
+	VList curr = g->connections[start];
+    
+    // Direct connections
+	while (curr != NULL) {
+	    
+	    //If start is a port and end is also a port, keep track of the sea.
+	    if ((curr->type == BOAT) && (idToType(start) == LAND) && (idToType(end) == LAND)) {
+	        seas[sea_index] = curr->v;
+	        sea_index++;
+	    }
+	    
+	    if (curr->v == end) {
+	        type[no_conn] = curr->type;
+	        no_conn++;
+	    }
+	    
+	    curr = curr->next;
+	}
+	
+	// Determine whether the ports are connected
+	if (sea_index > 0 && no_conn < NO_TRANS) {
+	    
+	    //Increment through the seas to determine if it connects to end's port
+	    for (int i = 0; i < sea_index; i++) {
+
+	        curr = g->connections[seas[i]];
+	        
+	        if (find_connect(curr, end)) {
+	            type[no_conn] = curr->type;
+	            no_conn++;
+	            break;
+	        }
+	    }   
+	    
+	}
+	
+	return no_conn;
 }
+
+//Find if the "find" exists within the "main" vlist
+int find_connect(VList main, LocationID find){
+    while (main != NULL) {     
+        if (main->v == find) return 1;
+        
+        main = main->next;
+    }
+    
+    return 0;
+}
+
