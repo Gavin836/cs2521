@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <curl/curl.h>
+#include <assert.h>
 #include "stack.h"
 #include "queue.h"
 #include "set.h"
@@ -59,6 +60,8 @@ int main(int argc, char **argv)
 	//    close the opened URL
 	//    sleep(1)
 	// }
+	
+	#if 0
 	if (!(handle = url_fopen(firstURL, "r"))) {
 		fprintf(stderr,"Couldn't open %s\n", next);
 		exit(1);
@@ -75,25 +78,52 @@ int main(int argc, char **argv)
 		}
 	}
 	url_fclose(handle);
-
+    #endif
+    
 	Graph g = newGraph(maxURLs);
 	Set s = newSet();
 	Queue todo = newQueue();
 
 	enterQueue(todo, firstURL);
 	char *curr;
+	
 	while (!emptyQueue(todo) && nVertices(g) < maxURLs){
+		//showQueue(todo);
 		curr = leaveQueue(todo);
-		if (isElem(s, curr)) continue;
+		//if (isElem(s, curr)) continue;
 
 		insertInto(s, curr);
-		handle = url_fopen(firstURL, "r");
+		handle = url_fopen(curr, "r");
 		
-	//	while (url_fgets(curr, ))
+		while(!url_feof(handle)){
+			url_fgets(buffer, sizeof(buffer), handle);
+			int pos = 0;
+			char result[BUFSIZE];
+			memset(result, 0, BUFSIZE);
+			
+			while ((pos = GetNextURL(buffer, firstURL, result, pos)) > 0) {
+				if ((nVertices(g) < maxURLs) || (isElem(s, result) && isElem(s, curr))){
+					assert(addEdge(g, curr, result) == 1);
+				}
+			
+				if (!isElem(s, result)){
+					insertInto(s, result);
+					enterQueue(todo, result);
+					//puts("into");
+				}
+				memset(result, 0, BUFSIZE);
+			}
+		}
 		url_fclose(handle);
+		sleep(1);
 	}
 
-	sleep(1);
+	showGraph(g, 1);
+	
+	disposeQueue(todo);
+	disposeSet(s);
+	disposeGraph(g);
+	
 	return 0;
 }
 
@@ -111,8 +141,7 @@ void setFirstURL(char *base, char *first)
 		strcpy(first,base);
 		strcat(first,"index.html");
 		base[strlen(base)-1] = '\0';
-	}
-	else {
+	} else {
 		strcpy(first,base);
 		strcat(first,"/index.html");
 	}
