@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <stdbool.h>
 #include "Graph.h"
 #include "Queue.h"
 
@@ -101,5 +102,90 @@ void showGraph(Graph g, char **names)
 int findPath(Graph g, Vertex src, Vertex dest, int max, int *path)
 {
 	assert(g != NULL);
-	return 0; // never find a path ... you need to fix this
+	
+	Queue searchQueue = newQueue();
+	bool *visited = calloc((size_t)g->nV, sizeof(bool));
+	Vertex *sTree = calloc((size_t)g->nV, sizeof(int));
+	
+	//Intialise the array to -1
+	for (int j = 0; j < g->nV; j++){
+		visited[j] = false;
+		sTree[j] = -1;
+	}
+    
+    int count = 0;
+	Vertex it;
+	QueueJoin(searchQueue, src);
+    sTree[src] = src;
+    visited[src] = true;
+    
+	while (!QueueIsEmpty(searchQueue)) {
+		it = QueueLeave(searchQueue);
+
+		for (int i = 0; i < g->nV; i++) {
+			if (g->edges[it][i] > 0 && visited[i] == false) {
+
+				if (g->edges[it][i] < max) {
+				    QueueJoin(searchQueue, i);
+				    visited[i] = true;
+				    sTree[i] = it;
+				}
+
+			}
+		}
+	    //showQueue(searchQueue);
+	}
+	/*
+	printf("Max %d, Source %d, Dest %d\n", max, src, dest);
+	for (int k = 0; k < g->nV; k++) {
+	    printf("%d | %d\n", k, sTree[k]);
+	}
+	*/
+	
+	if (sTree[dest] != -1) {
+        //Count hops
+        count = 2;                              //start and end cities
+        Vertex curr = dest;
+        while (sTree[curr] != src) {
+            count++;
+            curr = sTree[curr];
+        }
+        //Set flight path
+        path[0] = src;
+        curr = sTree[dest];
+        
+        for (int j = 2; j < count; j++) {
+            path[count - j] = curr;
+            curr = sTree[curr]; 
+        }
+        
+        path[count - 1] = dest;
+	}
+
+	free(visited);
+	dropQueue(searchQueue);
+	
+	if (count > 0) return count;
+
+	return 0;
 }
+
+#if 0
+void graph_bfs (Graph g, vertex v,
+        size_t *count, vertex pre[], vertex st[])
+{
+        Queue s = queue_new ();
+        queue_en (s, (edge){ v, v });
+        while (queue_size (s) > 0) {
+                edge e = queue_de (s);
+                if (pre[e.w] != -1) continue;
+                pre[e.w] = (*count)++; st[e.w] = e.v;
+                printf ("%d\n", e.w);
+                for (int i = 0; i < g->nV; i++) {
+                        if (has_edge (g, e.w, i) && pre[i] == -1)
+                                queue_en (s, (edge){ e.w, i });
+                }
+        }
+}
+#endif
+

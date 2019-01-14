@@ -23,7 +23,6 @@ typedef struct SetRep {
 } SetRep;
 
 // Function signatures
-
 Set newSet();
 void disposeSet(Set);
 void insertInto(Set,char *);

@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <curl/curl.h>
 #include "stack.h"
+#include "queue.h"
 #include "set.h"
 #include "directedGraph.h"
 #include "html.h"
@@ -74,6 +75,24 @@ int main(int argc, char **argv)
 		}
 	}
 	url_fclose(handle);
+
+	Graph g = newGraph(maxURLs);
+	Set s = newSet();
+	Queue todo = newQueue();
+
+	enterQueue(todo, firstURL);
+	char *curr;
+	while (!emptyQueue(todo) && nVertices(g) < maxURLs){
+		curr = leaveQueue(todo);
+		if (isElem(s, curr)) continue;
+
+		insertInto(s, curr);
+		handle = url_fopen(firstURL, "r");
+		
+	//	while (url_fgets(curr, ))
+		url_fclose(handle);
+	}
+
 	sleep(1);
 	return 0;
 }
