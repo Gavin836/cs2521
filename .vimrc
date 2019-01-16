@@ -28,7 +28,6 @@ set number
 set relativenumber
 
 "" Editing Setting
-inoremap tk <ESC>
 set autoindent
 set smartindent
 set tabstop=4
@@ -39,6 +38,7 @@ set showmatch
 
 "" Key Mappings
 nnoremap <space> za
+inoremap tk <ESC>
 
 "" Vanilla brackets autocomplete
 inoremap <C-n> <esc>/[)}"'\]>]<CR>:nohl<CR>a
