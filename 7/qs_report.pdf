@@ -1,0 +1,29 @@
+Testing with seed "test1" and 50000 numbers in ascending order
+
+pr: 0.120 + 0.008, 0.104 + 0.004, 0.132 + 0.004
+pn: 33.024 + 0, 33.016 + 0.016, 33.028 + 0.004
+pm: 0.032 + 0.012, 0.028 + 0.004, 0.032 + 0.0000
+
+Discussion: It is evident that naive sorting has by far the worst outcome for already sorted data. 
+this is because by selecting the last element as the pivot, which is the greatest number, all others
+will be placed on one side of the pivot, hence the worst case. Random sorting would most likely avoid 
+this worst case, while median of three definetly avoids the worst case, as a result, having the best result.
+
+
+Testing with seed "test1" and 50000 numbers in descending order
+pr: 0.116, 0.120, 0.112 +0.008
+pn: 20.321 + 0.004, 20.296, 20.308 + 0.004
+pm: 0.048 +0.004, 0.048 + 0.008, 0.048 + 0.004
+
+Discussion: Similar to above, however naive performed considerably better. This is because by we swap the pivot which would be the smallest number with the highest number. This partially reduces the worse case.
+
+Testing with seed "test1" and 50000 numbers in descending order
+pr: 0.120, 0.118. 0.120
+pn: 0.04, 0.036, 0.04
+pm: 0.04. 0,026, 0.044
+
+Discusson: Naive sorting has another big improvement this is because the data is very unlikey to be in any ordered 
+state, meaning that the worse case is avoided, and the selection of the pivot is more random. However, it is seen
+to be better than random. We can attribute this to the fact that as the buffer becomes more sorted the numbers
+at the end of the segment tend to not require to be sorted. Median sorting showed slight improvedments. It is 
+likely that with a greater input size differences will be more apparent.
