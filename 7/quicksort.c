@@ -16,7 +16,11 @@ void quicksort (int *data_set, size_t lo, size_t hi, mode m);
 size_t quicksort_partition(int *data_set, size_t lo, size_t hi, mode m);
 void swap_index(int *data_set, size_t  one, size_t  two);
 
+int tests(void);
+int print_set(int *data_set, size_t size);
+
 int main (int argc, char *argv[]){
+//	tests();
 	mode m = NONE;
 	if (argc > 1) {
 		if (strcmp(argv[1], "-pn") == 0) m = NAIVE;
@@ -31,7 +35,7 @@ int main (int argc, char *argv[]){
 		perror("usage ./quicksort [-pn | -pm | -pr]");
 		return 1;
 	}
-	
+
 	int data_size = 0;
 	int *data_set = NULL;
 
@@ -52,9 +56,24 @@ int main (int argc, char *argv[]){
 	if (m == MEDIAN) puts("Sorted by median of three pivots");
 	if (m == RANDOM) puts("Sorted by random pivot");
 	
-	for(int i = 0; i < data_size; i++) {
-		printf("%d\n", data_set[i]);
-	}
+	print_set(data_set, data_size);
+
+	return 0;
+}
+
+int tests(void) {
+	int data_set[9] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
+	quicksort(data_set, 0, 8, NAIVE);
+	print_set(data_set, 9);
+
+	int data_set1[9] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
+	quicksort(data_set1, 0, 8, RANDOM);
+	print_set(data_set1, 9);
+	
+	int data_set2[9] = {9, 8, 7, 6, 5, 4, 3, 2, 1};
+	quicksort(data_set2, 0, 8, MEDIAN);
+	print_set(data_set2, 9);
+
 	return 0;
 }
 
@@ -65,8 +84,9 @@ void quicksort (int *data_set, size_t lo, size_t hi, mode m) {
 	
 	p = quicksort_partition(data_set, lo, hi, m);
 	
-	quicksort(data_set, lo, p - 1, m);
-	quicksort(data_set, p + 1, hi, m);
+	
+	if(p > lo) quicksort(data_set, lo, p - 1, m);
+	if(p < hi) quicksort(data_set, p + 1, hi, m);
 	
 }
 
@@ -85,8 +105,8 @@ size_t quicksort_partition(int *data_set, size_t lo, size_t hi, mode m) {
 
 		right_most++;
 	}
-	
-	swap_index(data_set, left_most + 1, hi);
+	left_most++;	
+	swap_index(data_set, left_most, hi);
 
 	return (size_t)left_most;
 }
@@ -95,13 +115,19 @@ size_t quicksort_partition(int *data_set, size_t lo, size_t hi, mode m) {
 void set_pivot (int *data_set, size_t lo, size_t hi, mode m) {
 	size_t pivot = 0;
 	if (m == NAIVE) {
-		return ;	
+		return;	
 
 	} else if (m == MEDIAN) {
 		size_t median = (lo + hi) / 2;
 		int one_i = data_set[lo];
 		int two_i = data_set[median];
 		int three_i = data_set[hi];
+
+		// If only two elements
+		if (lo == median) {
+			if (one_i > three_i)  
+			return;
+		}
 
 		if (three_i > two_i && three_i > one_i)
 			pivot = (two_i >= one_i) ? median: lo;
@@ -119,10 +145,8 @@ void set_pivot (int *data_set, size_t lo, size_t hi, mode m) {
 
 	assert(pivot >= lo);
 	assert(pivot <= hi);
-
-	int temp = data_set[hi];
-	data_set[hi] = data_set[pivot];
-	data_set[pivot] = temp;
+	
+	swap_index(data_set, pivot, hi);
 }
 
 void swap_index(int *data_set, size_t  one, size_t  two) {
@@ -130,4 +154,12 @@ void swap_index(int *data_set, size_t  one, size_t  two) {
 
 	data_set[one] = data_set[two];
 	data_set[two] = temp;
+}
+
+int print_set(int *data_set, size_t size) {
+	for (int i = 0; i < size; i++) {
+		printf("%d ", data_set[i]);
+	}
+	puts("END");
+	return 0;
 }
