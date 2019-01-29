@@ -14,7 +14,7 @@ do
 			sorted) flag="A" ;;
 			reverse) flag="D" ;;
 			esac
-			{ ./gen $size $flag | time ./sort > /dev/null ; } 2>> log
+			{ ./gen $size $flag | time ./sortA > /dev/null ; } 2>> log
 		done
 		echo >> log
 	done

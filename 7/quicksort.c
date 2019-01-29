@@ -56,7 +56,7 @@ int main (int argc, char *argv[]){
 	if (m == MEDIAN) puts("Sorted by median of three pivots");
 	if (m == RANDOM) puts("Sorted by random pivot");
 	
-	print_set(data_set, data_size);
+//	print_set(data_set, data_size);
 
 	return 0;
 }
@@ -160,6 +160,5 @@ int print_set(int *data_set, size_t size) {
 	for (int i = 0; i < size; i++) {
 		printf("%d ", data_set[i]);
 	}
-	puts("END");
 	return 0;
 }
