@@ -289,12 +289,14 @@ bool search_normal (tree_node *t, Key k)
 ////////////////////////////////////////////////////////////////////////
 // Tree rotation functions
 
-// This function does not update size.
-// TODO: YOU MUST FIX THIS
 static tree_node *rotate_left (tree_node *curr)
 {
 	if (curr == NULL || curr->right == NULL)
 		return curr;
+
+	// Add sizes before modification
+	curr->right->size = curr->size;
+	curr->size = curr->right->left->size + curr->left->size;
 
 	tree_node *rotated_left = curr->right;
 	curr->right = rotated_left->left;
@@ -302,12 +304,14 @@ static tree_node *rotate_left (tree_node *curr)
 	return rotated_left;
 }
 
-// This function does not update size.
-// TODO: YOU MUST FIX THIS
 static tree_node *rotate_right (tree_node *curr)
 {
 	if (curr == NULL || curr->left == NULL)
 		return curr;
+	
+	// Add sizes before modification
+	curr->left->size = curr->size;
+	curr->size = curr->left->right->size + curr->right->size;
 
 	tree_node *rotated_right = curr->left;
 	curr->left = rotated_right->right;
