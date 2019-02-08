@@ -57,11 +57,23 @@ void hash_table_print_stats (hash_table *ht)
 {
 	assert (ht != NULL);
 	printf ("Hash Table Stats:\n");
-	printf ("Number of slots = %d\n", 0); // TODO
-	printf ("Number of items = %d\n", 0); // TODO
+	printf ("Number of slots = %d\n", ht->nslots);
+	printf ("Number of items = %d\n", ht->nitems);
 	printf ("Chain length distribution\n");
 	printf ("%8s %8s\n", "Length", "#Chains");
 	// TODO .. rest of function to show length/freq pairs
+	int *fq = calloc(ht->nslots, sizeof(int));
+
+	int length;
+	for(int i = 0; i < ht->nitems; i++){
+//		length = list_length(ht->lists[i]);
+//		fq[length] = fq[length] + 1;
+	}
+	
+	for(int i = 0; i < ht->nslots; i++) {	
+		if (fq[i] != 0) printf("    %d     %d", i, fq[i]);
+	}
+	free(fq);
 }
 
 // Insert a new value into the HashTable.

@@ -1,0 +1,27 @@
+Averages: [20, 100, 1000, 10 000, 100 000]
+    
+    no_rebalance: 0.028 (H:6), 0.032 (H:11), 0.032 (H:21), 0.084 (H:35), 0.716 (H:127)    
+    rebalance_1:  0.024 (H:4), 0.028 (H:6), 0.08 (H:9), 4.936 (H:13),  TOOLONG
+    rebalance_100: 0.024 (H:6), 0.024 (H:6), 0.04 (H:9), 0.154 (H:13), 9.288 (H:16)
+    rebalance_1000: 0.024 (H:6), 0.028 (H:11), 0.032 (H:9), 0.088 (H:13), 1.54 (H:16)
+    random: 0.028 (H:6), 0.024 (H:14), 0.036 (H:24), 0.92(H:32), 0.792 (H:39)
+    splay: 0.024 (H:5), 0.024 (H:13), 0.036 (H:23), 0.096 (H:35), 0.802 (H:62)
+    
+    
+Discussion:
+    Looking at the results the rebalace1 stands out for larger numbers of elements
+    to sort. This can be attributed to the exponetial increase in time complexity
+    as the tree need to be rebalanced frequently, however the height are minimised. 
+    rebal_100 and rebal_1000 show a similar trend but for larger numbers. The 
+    no_balanced stratergy showed the best run time as no attempted at improving 
+    the structure was made, however the height seems to be increasing rapidly. THe
+    random insertion showed a similar trend to no_rebal, however the heights 
+    showed a great improvement. This may be attributed to the use of randomness 
+    to reduce the chances of leading to a degrenerate tree component. THe splay tree
+    had a much better run time that the rebal strats, as it amortised the sorting
+    process, however the heights weren't as good. For 100 000 inputs the tree size
+    was worse than random, but 2x less than standard. This stratergy seems to
+    minimised the height of the tree without drastically increasing the run time.
+    
+    More tests will need to be done with greater number of inputs to compare
+    random and splay insertions to prove the effectiveness of splay. 
