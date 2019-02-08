@@ -74,6 +74,7 @@ static void unimplemented (void) __attribute__((noreturn));
 // In this implementation, a tree is not just a pointer to the root node
 // but is a struct which contains a pointer to the root node, as well as
 // the balancing strategy used.
+
 tree *tree_new (enum tree_strategy balance_strategy)
 {
 	tree *new = malloc (sizeof *new);
@@ -101,6 +102,29 @@ void tree_insert (tree *tree, Item it)
 	switch (tree->strategy) {
 	case NO_REBALANCE:
 		tree->root = insert_normal (tree->root, it);
+		break;
+	
+	case REBALANCE_1:
+		tree->root = insert_normal (tree->root, it);
+		balance(tree->root);
+		break;
+
+	case REBALANCE_100:
+		tree->root = insert_normal (tree->root, it);
+		if (tree_count(tree) % 100 == 0) balance(tree->root);
+		break;
+
+	case REBALANCE_1000:
+		tree->root = insert_normal (tree->root, it);
+		if (tree_count(tree) % 1000 == 0) balance(tree->root);
+		break;
+
+	case RANDOMISED:
+		tree->root = insert_random (tree->root, it);
+		break;
+
+	case SPLAY:
+		tree->root = insert_splay (tree->root, it);
 		break;
 
 	default:
@@ -294,28 +318,66 @@ static tree_node *rotate_left (tree_node *curr)
 	if (curr == NULL || curr->right == NULL)
 		return curr;
 
-	// Add sizes before modification
-	curr->right->size = curr->size;
-	curr->size = curr->right->left->size + curr->left->size;
+	size_t left_load = 0;
+	size_t center_load = 0;
+	size_t right_load = 0;
+
+	if (curr->left != NULL) left_load = curr->left->size;
+	if (curr->right->left != NULL) center_load = curr->right->left->size;
+	if (curr->right->right != NULL) right_load = curr->right->right->size;
 
 	tree_node *rotated_left = curr->right;
 	curr->right = rotated_left->left;
 	rotated_left->left = curr;
+
+	rotated_left->size = (left_load + 1 + center_load) + 1 + (right_load);
+	rotated_left->left->size = (left_load + 1 + center_load);
+	
 	return rotated_left;
 }
+#if 0
+static void insert_ends(tree_node *tree) {
+	if (tree == NULL || tree->size == 0) return;
+
+	if (tree->left == NULL) {
+		tree_node *new = malloc(sizeof (tree_node));
+		tree->left = new;
+
+	} else {
+		insert_ends(tree->left);
+	}
+
+	if (tree->right == NULL) {
+		tree_node *new2 = malloc(sizeof (tree_node));
+		tree->right = new2;
+
+	} else {
+		insert_ends(tree->right);
+	}
+
+}
+#endif
 
 static tree_node *rotate_right (tree_node *curr)
 {
 	if (curr == NULL || curr->left == NULL)
 		return curr;
 	
-	// Add sizes before modification
-	curr->left->size = curr->size;
-	curr->size = curr->left->right->size + curr->right->size;
+	size_t left_load = 0;
+	size_t center_load = 0;
+	size_t right_load = 0;
 
+	if (curr->left->left != NULL) left_load = curr->left->left->size;
+	if (curr->left->right != NULL) center_load = curr->left->right->size;
+	if (curr->right != NULL) right_load = curr->right->size;
+	
 	tree_node *rotated_right = curr->left;
 	curr->left = rotated_right->right;
 	rotated_right->right = curr;
+
+	rotated_right->size = (left_load + 1 + center_load) + 1 + (right_load);
+	rotated_right->right->size = (right_load + 1 + center_load);
+
 	return rotated_right;
 }
 
@@ -479,4 +541,55 @@ static void unimplemented (void)
 {
 	puts ("Not implemented.");
 	exit (EXIT_FAILURE);
+}
+
+void white_box(void) {
+	puts("basic tree");
+	Tree new = tree_new(NO_REBALANCE);
+
+	tree_insert(new, "d");
+	tree_insert(new, "b");
+	tree_insert(new, "f");
+	tree_insert(new, "a");
+	tree_insert(new, "c");
+	tree_insert(new, "e");
+	tree_insert(new, "g");
+	
+	assert(tree_count(new) == 7);
+	assert(new->root->left->size == 3);
+	assert(new->root->right->size == 3);
+
+	new->root  = rotate_left(new->root);
+	assert(tree_count(new) == 7);
+	assert(new->root->left->size == 5);
+	assert(new->root->right->size == 1);
+
+	assert(cmp(new->root->item, "f") == 0);
+	assert(cmp(new->root->left->item, "d") == 0);
+	assert(cmp(new->root->right->item, "g") == 0);
+
+	new->root  = rotate_left(new->root);
+	assert(tree_count(new) == 7);
+	assert(new->root->left->size == 6);
+
+	assert(cmp(new->root->item, "g") == 0);
+	assert(cmp(new->root->left->item, "f") == 0);
+
+	new->root  = rotate_right(new->root);
+	assert(tree_count(new) == 7);
+	assert(new->root->left->size == 5);
+	assert(new->root->right->size == 1);
+
+	assert(cmp(new->root->item, "f") == 0);
+	assert(cmp(new->root->left->item, "d") == 0);
+	assert(cmp(new->root->right->item, "g") == 0);
+
+	new->root  = rotate_right(new->root);
+	assert(tree_count(new) == 7);
+	assert(new->root->left->size == 3);
+	assert(new->root->right->size == 3);
+
+	assert(cmp(new->root->item, "d") == 0);
+	assert(cmp(new->root->left->item, "b") == 0);
+	assert(cmp(new->root->right->item, "f") == 0);
 }

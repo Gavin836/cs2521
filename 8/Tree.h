@@ -42,4 +42,5 @@ void tree_display(Tree t);
 // Print out some statistics about the tree.
 void tree_print_stats(Tree t);
 
+void white_box (void);
 #endif
