@@ -105,17 +105,19 @@ void tree_insert (tree *tree, Item it)
 
 	case REBALANCE_1:
 		tree->root = insert_normal (tree->root, it);
-		balance(tree->root);
+		tree->root = balance(tree->root);
 		break;
 
 	case REBALANCE_100:
 		tree->root = insert_normal (tree->root, it);
-		if (tree_count(tree) % 100 == 0) balance(tree->root);
+		if (tree_count(tree) % 100 == 0) 
+			tree->root = balance(tree->root);
 		break;
 
 	case REBALANCE_1000:
 		tree->root = insert_normal (tree->root, it);
-		if (tree_count(tree) % 1000 == 0) balance(tree->root);
+		if (tree_count(tree) % 1000 == 0) 
+			tree->root = balance(tree->root);
 		break;
 
 	case RANDOMISED:
@@ -144,8 +146,8 @@ bool tree_search (tree *tree, Key k)
 {
 	assert (tree != NULL);
 	switch (tree->strategy) {
-	case SPLAY:
-		unimplemented ();
+	//case SPLAY:
+//		unimplemented ();
 	default:
 		return search_normal (tree->root, k);
 	}

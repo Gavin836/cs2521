@@ -1,5 +1,4 @@
-// words.c ... Build a tree of words from /usr/dict/words
-// Written by John Shepherd, August 2008
+// words.c ... Build a tree of words from /usr/dict/words // Written by John Shepherd, August 2008
 // Modified by Angela Finlayson, January 2009
 // Further modified by $name, January 2019
 
@@ -50,7 +49,7 @@ int main (int argc, char **argv)
 	tree_print_stats (word_tree);
 
 	// Note: you may wish to comment this out for large trees!
-	tree_display (word_tree);
+//	tree_display (word_tree);
 
 	tree_destroy (word_tree);
 	fclose (f);
