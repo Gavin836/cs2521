@@ -1,13 +1,11 @@
 # COMP2521 19T0 ... lab 8 makefile
 
 CC	 = 2521 3c
-#CFLAGS = -g
 
 .PHONY: all
 all:	words words2 mkwords
 
 mkwords:	mkwords.c
-test_tree.o:  Tree.o Item.o test.o
 
 words:		words.o Tree.o Item.o
 words.o:	words.c Tree.h Item.h

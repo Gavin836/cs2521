@@ -22,7 +22,6 @@ int read_words_into_tree(FILE *, Tree t);
 // Get words, store in tree, print tree stats
 int main (int argc, char **argv)
 {
-//	white_box();
 	char *words_file = WORD_FILE;
 	if (argc > 1)
 		words_file = argv[1];

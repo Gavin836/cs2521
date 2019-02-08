@@ -4,7 +4,7 @@
 // An implementation of a BST with a field (size) to keep how many nodes
 // are in each sub-tree.  This implementation also includes functions to
 // balance the tree
-
+//NEW
 #include <assert.h>
 #include <ctype.h>
 #include <err.h>
@@ -74,7 +74,6 @@ static void unimplemented (void) __attribute__((noreturn));
 // In this implementation, a tree is not just a pointer to the root node
 // but is a struct which contains a pointer to the root node, as well as
 // the balancing strategy used.
-
 tree *tree_new (enum tree_strategy balance_strategy)
 {
 	tree *new = malloc (sizeof *new);
@@ -102,29 +101,6 @@ void tree_insert (tree *tree, Item it)
 	switch (tree->strategy) {
 	case NO_REBALANCE:
 		tree->root = insert_normal (tree->root, it);
-		break;
-	
-	case REBALANCE_1:
-		tree->root = insert_normal (tree->root, it);
-		balance(tree->root);
-		break;
-
-	case REBALANCE_100:
-		tree->root = insert_normal (tree->root, it);
-		if (tree_count(tree) % 100 == 0) balance(tree->root);
-		break;
-
-	case REBALANCE_1000:
-		tree->root = insert_normal (tree->root, it);
-		if (tree_count(tree) % 1000 == 0) balance(tree->root);
-		break;
-
-	case RANDOMISED:
-		tree->root = insert_random (tree->root, it);
-		break;
-
-	case SPLAY:
-		tree->root = insert_splay (tree->root, it);
 		break;
 
 	default:
@@ -230,7 +206,7 @@ static void destroy_nodes (tree_node *n)
 	if (n == NULL) return;
 	destroy_nodes (n->left);
 	destroy_nodes (n->right);
-	//free (n->item);
+	free (n->item);
 	free (n);
 }
 
@@ -313,71 +289,29 @@ bool search_normal (tree_node *t, Key k)
 ////////////////////////////////////////////////////////////////////////
 // Tree rotation functions
 
+// This function does not update size.
+// TODO: YOU MUST FIX THIS
 static tree_node *rotate_left (tree_node *curr)
 {
 	if (curr == NULL || curr->right == NULL)
 		return curr;
 
-	size_t left_load = 0;
-	size_t center_load = 0;
-	size_t right_load = 0;
-
-	if (curr->left != NULL) left_load = curr->left->size;
-	if (curr->right->left != NULL) center_load = curr->right->left->size;
-	if (curr->right->right != NULL) right_load = curr->right->right->size;
-
 	tree_node *rotated_left = curr->right;
 	curr->right = rotated_left->left;
 	rotated_left->left = curr;
-
-	rotated_left->size = (left_load + 1 + center_load) + 1 + (right_load);
-	rotated_left->left->size = (left_load + 1 + center_load);
-	
 	return rotated_left;
 }
-#if 0
-static void insert_ends(tree_node *tree) {
-	if (tree == NULL || tree->size == 0) return;
 
-	if (tree->left == NULL) {
-		tree_node *new = malloc(sizeof (tree_node));
-		tree->left = new;
-
-	} else {
-		insert_ends(tree->left);
-	}
-
-	if (tree->right == NULL) {
-		tree_node *new2 = malloc(sizeof (tree_node));
-		tree->right = new2;
-
-	} else {
-		insert_ends(tree->right);
-	}
-
-}
-#endif
-
+// This function does not update size.
+// TODO: YOU MUST FIX THIS
 static tree_node *rotate_right (tree_node *curr)
 {
 	if (curr == NULL || curr->left == NULL)
 		return curr;
-	
-	size_t left_load = 0;
-	size_t center_load = 0;
-	size_t right_load = 0;
 
-	if (curr->left->left != NULL) left_load = curr->left->left->size;
-	if (curr->left->right != NULL) center_load = curr->left->right->size;
-	if (curr->right != NULL) right_load = curr->right->size;
-	
 	tree_node *rotated_right = curr->left;
 	curr->left = rotated_right->right;
 	rotated_right->right = curr;
-
-	rotated_right->size = (left_load + 1 + center_load) + 1 + (right_load);
-	rotated_right->right->size = (right_load + 1 + center_load);
-
 	return rotated_right;
 }
 
@@ -386,34 +320,35 @@ static tree_node *rotate_right (tree_node *curr)
 
 static tree_node *balance (tree_node *tree)
 {
-	if (tree == NULL) return NULL;
-	if ( tree->size >= 2) {
-		tree = partition (tree, tree->size / 2);
-		tree->left = balance (tree->left);
-		tree->right = balance (tree->right);
-	}
-	return tree;
+    if (tree == NULL) return NULL;
+
+    if (tree->size >= 2) {
+        tree = partition(tree, tree->size / 2);
+        tree->left = balance(tree->left);
+        tree->right = balance(tree->right);
+    }
+    return tree;
 }
 
 // partition tree at node with position pos (counting from 0) in the
 // sorted sequence of all items, node become new root node.
 static tree_node *partition (tree_node *curr, size_t pos)
 {
-	if (curr == NULL) return curr;
-	
-	size_t left_subtree_size = 0;
-	if(curr->left != NULL) {
-		left_subtree_size = curr->left->size;
-	}
-
-	if (left_subtree_size > pos) {
-		curr->left = partition (curr->left, pos);
-		curr = rotate_right (curr);
-	} else if (left_subtree_size < pos) {
-		curr->right = partition (curr->right, pos - 1 - left_subtree_size);
-		curr = rotate_left (curr);
-	}
-	return curr;
+    if (curr == NULL) {
+        return curr;
+    }
+    int left_subtree_size = 0;
+    if (curr->left != NULL) {
+        left_subtree_size = curr->left->size;
+    }
+    if (left_subtree_size > pos) {
+        curr->left = partition(curr->left, pos);
+        curr = rotate_right(curr);
+    } else if (left_subtree_size < pos) {
+        curr->right = partition(curr->right, pos-1-left_subtree_size);
+        curr = rotate_left(curr);
+    }
+    return curr;
 }
 
 
@@ -546,57 +481,4 @@ static void unimplemented (void)
 {
 	puts ("Not implemented.");
 	exit (EXIT_FAILURE);
-}
-
-void white_box(void) {
-	puts("basic tree");
-	Tree new = tree_new(NO_REBALANCE);
-
-	tree_insert(new, "d");
-	tree_insert(new, "b");
-	tree_insert(new, "f");
-	tree_insert(new, "a");
-	tree_insert(new, "c");
-	tree_insert(new, "e");
-	tree_insert(new, "g");
-	
-	assert(tree_count(new) == 7);
-	assert(new->root->left->size == 3);
-	assert(new->root->right->size == 3);
-
-	new->root  = rotate_left(new->root);
-	assert(tree_count(new) == 7);
-	assert(new->root->left->size == 5);
-	assert(new->root->right->size == 1);
-
-	assert(cmp(new->root->item, "f") == 0);
-	assert(cmp(new->root->left->item, "d") == 0);
-	assert(cmp(new->root->right->item, "g") == 0);
-
-	new->root  = rotate_left(new->root);
-	assert(tree_count(new) == 7);
-	assert(new->root->left->size == 6);
-
-	assert(cmp(new->root->item, "g") == 0);
-	assert(cmp(new->root->left->item, "f") == 0);
-
-	new->root  = rotate_right(new->root);
-	assert(tree_count(new) == 7);
-	assert(new->root->left->size == 5);
-	assert(new->root->right->size == 1);
-
-	assert(cmp(new->root->item, "f") == 0);
-	assert(cmp(new->root->left->item, "d") == 0);
-	assert(cmp(new->root->right->item, "g") == 0);
-
-	new->root  = rotate_right(new->root);
-	assert(tree_count(new) == 7);
-	assert(new->root->left->size == 3);
-	assert(new->root->right->size == 3);
-
-	assert(cmp(new->root->item, "d") == 0);
-	assert(cmp(new->root->left->item, "b") == 0);
-	assert(cmp(new->root->right->item, "f") == 0);
-
-	tree_destroy(new);
 }
